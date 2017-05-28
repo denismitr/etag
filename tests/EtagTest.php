@@ -6,8 +6,13 @@ use Denismitr\ETag\ETagMiddleware;
 use Illuminate\Http\Request;
 use Mockery as m;
 
-class Test extends \PHPUnit\Framework\TestCase
+class Test extends \Orchestra\Testbench\TestCase
 {
+    public function tearDown()
+    {
+        m::close();
+    }
+
     /** @test */
     public function it_returns_response_with_etag_header()
     {
@@ -27,18 +32,60 @@ class Test extends \PHPUnit\Framework\TestCase
                 $this->getValidResponseContent()
             ));
 
-        // Request
-        $request = Request::create('http://example.com/articles', 'GET', [], [], [], [
-            'HTTP_ACCEPT' => 'application/json'
-        ]);
+        $request = m::mock('Illuminate\Http\Request');
+        $request->shouldReceive('method')->andReturn('GET');
+        $request->shouldReceive('expectsJson')->andReturn(true);
+        $request->shouldReceive('header')->with('If-Match')->once()->andReturn(null);
+        $request->shouldReceive('header')->with('If-Not-Match')->once()->andReturn(null);
 
+        $this->runMiddleware($request, $response);
+    }
+
+    /** @test */
+    public function it_returns_304_unmodified_when_the_correct_etag_is_passed()
+    {
+        $data = $this->getValidResponseContent();
+        $etag = $this->getValidEtag($data);
+
+        $response = m::mock('Illuminate\Http\Response')
+            ->shouldReceive('getStatusCode')
+            ->once()
+            ->andReturn(200)
+            ->shouldReceive('getContent')
+            ->once()
+            ->andReturn($data)
+            ->getMock();
+
+        $response
+            ->shouldReceive('header')
+            ->once()
+            ->with('ETag', $etag);
+
+        $request = m::mock('Illuminate\Http\Request');
+        $request->shouldReceive('method')->andReturn('GET');
+        $request->shouldReceive('expectsJson')->andReturn(true);
+        $request->shouldReceive('header')->with('If-Match')->once()->andReturn(null);
+        $request->shouldReceive('header')->with('If-Not-Match')->once()->andReturn($etag);
+
+        $response = $this->runMiddleware($request, $response);
+
+        $this->assertEquals(304, $response->status());
+    }
+
+    /**
+     * Run the middleware
+     *
+     * @param Request $request
+     * @param Response $response
+     * @return Response
+     */
+    protected function runMiddleware($request, $response)
+    {
         $middleware = new ETagMiddleware;
 
-        $returnedResponse = $middleware->handle($request, function() use ($response) {
+        return $middleware->handle($request, function() use ($response) {
             return $response;
         });
-
-        $this->assertNotNull($returnedResponse);
     }
 
     /**

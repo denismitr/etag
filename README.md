@@ -14,7 +14,7 @@ __Denis Mitrofanov__
 Use composer to install the package:
 
 ```bash
-composer require denismitr/laravel-etag-middleware
+composer require denismitr/etag
 ```
 
 Include in your `app/Http/Kernel.php` to the appropriate section (all requests or named middleware):
