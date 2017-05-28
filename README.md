@@ -18,7 +18,8 @@ Use composer to install the package:
 composer require denismitr/etag
 ```
 
-Include in your `app/Http/Kernel.php` to the appropriate section (all requests or named middleware):
+Include in your `app/Http/Kernel.php` to the appropriate section
+(all requests if all your routes are API or named middleware + API middleware group or just named middleware):
 
 Global middleware
 -------
