@@ -34,7 +34,7 @@ Global middleware
  */
 protected $middleware = [
     ...
-    \Denismitr\Etags\ETagMiddleware::class
+    \Denismitr\ETags\ETagMiddleware::class
 ];
 ```
 Named middleware
@@ -49,7 +49,7 @@ Named middleware
  */
 protected $routeMiddleware = [
     ...
-    'etag' => \Denismitr\Etags\ETagMiddleware::class,
+    'etag' => \Denismitr\ETags\ETagMiddleware::class,
 ];
 
 /**
