@@ -8,7 +8,7 @@ __Denis Mitrofanov__
 
 [TheCollection.ru](https://thecollection.ru)
 
-### Installation
+## Installation
 --------
 
 Use composer to install the package:
