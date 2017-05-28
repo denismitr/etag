@@ -32,7 +32,7 @@ class ETagMiddleware
             if ($ifMatch) {
                 $etagList = explode(',', $ifMatch);
 
-                if ( ! in_array($etag, $etagList) || ! in_array('*') ) {
+                if ( ! in_array($etag, $etagList) || ! in_array('*', $etagList) ) {
                     if ($request->expectsJson()) {
                         return response()->json([
                             'error' => [
@@ -40,7 +40,7 @@ class ETagMiddleware
                                 'code' => 'PRECONDITION_FAILED',
                                 'message' => 'Precondition failed.'
                             ]
-                        ]);
+                        ], 412);
                     }
 
                     return response('Precondition failed', 412);
@@ -48,7 +48,7 @@ class ETagMiddleware
             } else if ($ifNotMatch) {
                 $etagList = explode(',', $ifNotMatch);
 
-                if ( in_array($etag, $etagList) || in_array('*') ) {
+                if ( in_array($etag, $etagList) || in_array('*', $etagList) ) {
                     if ($request->expectsJson()) {
                         return response()->json(null, 304);
                     }

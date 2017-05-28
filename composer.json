@@ -1,6 +1,6 @@
 {
-    "name": "denismitr/laravel-etags-middleware",
-    "description": "Etags Middleware for Laravel",
+    "name": "denismitr/laravel-etag-middleware",
+    "description": "Etag Middleware for Laravel",
     "license": "MIT",
     "keywords": ["laravel", "etags", "etag", "middleware", "http"],
     "authors": [
