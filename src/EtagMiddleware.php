@@ -32,7 +32,7 @@ class ETagMiddleware
             if ($ifMatch) {
                 $etagList = explode(',', $ifMatch);
 
-                if ( ! in_array($etag, $etagList) || ! in_array('*', $etagList) ) {
+                if ( ! in_array($etag, $etagList) && ! in_array('*', $etagList) ) {
                     if ($request->expectsJson()) {
                         return response()->json([
                             'error' => [
