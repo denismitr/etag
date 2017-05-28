@@ -1,0 +1,23 @@
+{
+    "name": "denismitr/laravel-etags-middleware",
+    "description": "Etags Middleware for Laravel",
+    "license": "MIT",
+    "keywords": ["laravel", "etags", "etag", "middleware", "http"],
+    "authors": [
+        {
+            "name": "Denis Mitrofanov",
+            "email": "denis.mitr@gmail.com"
+        }
+    ],
+    "require": {
+        "illuminate/support": "5.1.x|5.2.x|5.3.x|5.4.x",
+        "symfony/http-foundation": "~2.7|~3.0",
+        "symfony/http-kernel": "~2.7|~3.0",
+        "illuminate/http": "5.1.x|5.2.x|5.3.x|5.4.x"
+    },
+    "autoload": {
+        "prs-4": {
+            "Denismitr\\Etags\\": "src/"
+        }
+    }
+}
