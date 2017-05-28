@@ -17,7 +17,7 @@
     },
     "autoload": {
         "prs-4": {
-            "Denismitr\\Etags\\": "src/"
+            "Denismitr\\Etag\\": "src/"
         }
     }
 }

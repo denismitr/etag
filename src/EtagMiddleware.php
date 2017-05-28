@@ -1,6 +1,6 @@
 <?php
 
-namespace Denismitr\Etags;
+namespace Denismitr\Etag;
 
 use Closure;
 
