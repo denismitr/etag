@@ -17,7 +17,7 @@ class ETagMiddleware
     {
         $response = $next($request);
 
-        if ($response->getStatusCode() !== 200) {
+        if ($response->getStatusCode() !== 200 || ! $request->expectsJson()) {
             return $response;
         }
 
@@ -29,31 +29,23 @@ class ETagMiddleware
             $ifMatch = $request->header('If-Match');
             $ifNotMatch = $request->header('If-Not-Match');
 
-            if ($ifMatch) {
+            if ( ! is_null($ifMatch) ) {
                 $etagList = explode(',', $ifMatch);
 
                 if ( ! in_array($etag, $etagList) && ! in_array('*', $etagList) ) {
-                    if ($request->expectsJson()) {
-                        return response()->json([
-                            'error' => [
-                                'http_code' => 412,
-                                'code' => 'PRECONDITION_FAILED',
-                                'message' => 'Precondition failed.'
-                            ]
-                        ], 412);
-                    }
-
-                    return response('Precondition failed', 412);
+                    return response()->json([
+                        'error' => [
+                            'http_code' => 412,
+                            'code' => 'PRECONDITION_FAILED',
+                            'message' => 'Precondition failed.'
+                        ]
+                    ], 412);
                 }
-            } else if ($ifNotMatch) {
+            } else if ( ! is_null($ifNotMatch) ) {
                 $etagList = explode(',', $ifNotMatch);
 
                 if ( in_array($etag, $etagList) || in_array('*', $etagList) ) {
-                    if ($request->expectsJson()) {
-                        return response()->json(null, 304);
-                    }
-
-                    return response(null, 304);
+                    return response()->json(null, 304);
                 }
             }
         }
