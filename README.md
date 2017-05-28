@@ -1,5 +1,5 @@
 # Laravel Etag Middleware for JSON APIs
-This a middleware specifically for the Laravel framework and __RESTful API__s build with it.
+This a middleware specifically for the Laravel framework and __RESTful APIs__ build with it.
 It hashaes the response content and adds it to ETag header of HTTP response.
 Then it listenes to __If-Match__ and __If-Not-Match__ headers of the requests that expect to
 receive json in response in order to see if a new content needs to be delivered or just 304 Not Modified response is sufficient.
@@ -23,17 +23,17 @@ Include in your `app/Http/Kernel.php` to the appropriate section (all requests o
 Global middleware
 -------
 ```php
-    /**
-     * The application's global HTTP middleware stack.
-     *
-     * These middleware are run during every request to your application.
-     *
-     * @var array
-     */
-    protected $middleware = [
-        ...
-        \Denismitr\Etags\ETagMiddleware::class
-    ];
+/**
+ * The application's global HTTP middleware stack.
+ *
+ * These middleware are run during every request to your application.
+ *
+ * @var array
+ */
+protected $middleware = [
+    ...
+    \Denismitr\Etags\ETagMiddleware::class
+];
 ```
 Named middleware
 ---------------
@@ -48,5 +48,21 @@ Named middleware
 protected $routeMiddleware = [
     ...
     'etag' => \Denismitr\Etags\ETagMiddleware::class,
+];
+
+/**
+ * The application's route middleware groups.
+ *
+ * @var array
+ */
+protected $middlewareGroups = [
+    'web' => [
+        ...
+    ],
+
+    'api' => [
+        ...
+        'etag'
+    ],
 ];
 ```
