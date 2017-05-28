@@ -8,6 +8,8 @@ use Mockery as m;
 
 class Test extends \Orchestra\Testbench\TestCase
 {
+    use \Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+
     public function tearDown()
     {
         m::close();
@@ -16,21 +18,10 @@ class Test extends \Orchestra\Testbench\TestCase
     /** @test */
     public function it_returns_response_with_etag_header()
     {
-        $response = m::mock('Illuminate\Http\Response')
-            ->shouldReceive('getStatusCode')
-            ->once()
-            ->andReturn(200)
-            ->shouldReceive('getContent')
-            ->once()
-            ->andReturn($this->getValidResponseContent())
-            ->getMock();
+        $data = $this->getValidResponseContent();
+        $etag = $this->getValidEtag($data);
 
-        $response
-            ->shouldReceive('header')
-            ->once()
-            ->with('ETag', $this->getValidEtag(
-                $this->getValidResponseContent()
-            ));
+        $response = $this->getResponseMockWithEtag($data, $etag);
 
         $request = m::mock('Illuminate\Http\Request');
         $request->shouldReceive('method')->andReturn('GET');
@@ -38,7 +29,8 @@ class Test extends \Orchestra\Testbench\TestCase
         $request->shouldReceive('header')->with('If-Match')->once()->andReturn(null);
         $request->shouldReceive('header')->with('If-Not-Match')->once()->andReturn(null);
 
-        $this->runMiddleware($request, $response);
+        $response = $this->runMiddleware($request, $response);
+        $this->assertInstanceOf('Mockery_0_Illuminate_Http_Response', $response);
     }
 
     /** @test */
@@ -47,19 +39,7 @@ class Test extends \Orchestra\Testbench\TestCase
         $data = $this->getValidResponseContent();
         $etag = $this->getValidEtag($data);
 
-        $response = m::mock('Illuminate\Http\Response')
-            ->shouldReceive('getStatusCode')
-            ->once()
-            ->andReturn(200)
-            ->shouldReceive('getContent')
-            ->once()
-            ->andReturn($data)
-            ->getMock();
-
-        $response
-            ->shouldReceive('header')
-            ->once()
-            ->with('ETag', $etag);
+        $response = $this->getResponseMockWithEtag($data, $etag);
 
         $request = m::mock('Illuminate\Http\Request');
         $request->shouldReceive('method')->andReturn('GET');
@@ -69,7 +49,47 @@ class Test extends \Orchestra\Testbench\TestCase
 
         $response = $this->runMiddleware($request, $response);
 
+        $this->assertInstanceOf(\Illuminate\Http\JsonResponse::class, $response);
         $this->assertEquals(304, $response->status());
+    }
+
+    /** @test */
+    public function it_returns_304_unmodified_when_the_correct_asterix_is_passed()
+    {
+        $data = $this->getValidResponseContent();
+        $etag = $this->getValidEtag($data);
+
+        $response = $this->getResponseMockWithEtag($data, $etag);
+
+        $request = m::mock('Illuminate\Http\Request');
+        $request->shouldReceive('method')->andReturn('GET');
+        $request->shouldReceive('expectsJson')->andReturn(true);
+        $request->shouldReceive('header')->with('If-Match')->once()->andReturn(null);
+        $request->shouldReceive('header')->with('If-Not-Match')->once()->andReturn('*');
+
+        $response = $this->runMiddleware($request, $response);
+
+        $this->assertInstanceOf(\Illuminate\Http\JsonResponse::class, $response);
+        $this->assertEquals(304, $response->status());
+    }
+
+    /** @test */
+    public function it_receives_new_content_if_etag_not_match()
+    {
+        $data = $this->getValidResponseContent();
+        $etag = $this->getValidEtag($data);
+
+        $response = $this->getResponseMockWithEtag($data, $etag);
+
+        $request = m::mock('Illuminate\Http\Request');
+        $request->shouldReceive('method')->andReturn('GET');
+        $request->shouldReceive('expectsJson')->andReturn(true);
+        $request->shouldReceive('header')->with('If-Match')->once()->andReturn(null);
+        $request->shouldReceive('header')->with('If-Not-Match')->once()->andReturn('"wrong-etag"');
+
+        $response = $this->runMiddleware($request, $response);
+
+        $this->assertInstanceOf('Mockery_0_Illuminate_Http_Response', $response);
     }
 
     /**
@@ -98,6 +118,31 @@ class Test extends \Orchestra\Testbench\TestCase
         return '"' . md5($data) . '"';
     }
 
+
+    protected function getResponseMockWithEtag($data, $etag)
+    {
+        $response = m::mock('Illuminate\Http\Response')
+            ->shouldReceive('getStatusCode')
+            ->once()
+            ->andReturn(200)
+            ->shouldReceive('getContent')
+            ->once()
+            ->andReturn($data)
+            ->getMock();
+
+        $response
+            ->shouldReceive('header')
+            ->once()
+            ->with('ETag', $etag);
+
+        return $response;
+    }
+
+    /**
+     * Get response contant sample data
+     *
+     * @return array
+     */
     protected function getValidResponseContent()
     {
         return json_encode([
