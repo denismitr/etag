@@ -1,7 +1,8 @@
-# Laravel Etag Middleware
-This a middleware specifically for the Laravel framework.
+# Laravel Etag Middleware for JSON APIs
+This a middleware specifically for the Laravel framework and __RESTful API__s build with it.
 It hashaes the response content and adds it to ETag header of HTTP response.
-Then it listenes to __If-Match__ and __If-Not-Match__ headers of the requests to see if a new content needs to be delivered.
+Then it listenes to __If-Match__ and __If-Not-Match__ headers of the requests that expect to
+receive json in response in order to see if a new content needs to be delivered or just 304 Not Modified response is sufficient.
 
 ## Author
 __Denis Mitrofanov__
