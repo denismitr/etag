@@ -27,7 +27,7 @@ class ETagMiddleware
             $response->header('ETag', $etag);
 
             $ifMatch = $request->header('If-Match');
-            $ifNotMatch = $request->header('If-Not-Match');
+            $ifNotMatch = $request->header('If-None-Match');
 
             if ( ! is_null($ifMatch) ) {
                 $etagList = explode(',', $ifMatch);

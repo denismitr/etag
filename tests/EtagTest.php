@@ -35,7 +35,7 @@ class Test extends \Orchestra\Testbench\TestCase
         $request->shouldReceive('method')->once()->andReturn('GET');
         $request->shouldReceive('expectsJson')->once()->andReturn(true);
         $request->shouldReceive('header')->with('If-Match')->once()->andReturn(null);
-        $request->shouldReceive('header')->with('If-Not-Match')->once()->andReturn(null);
+        $request->shouldReceive('header')->with('If-None-Match')->once()->andReturn(null);
 
         $response = $this->runMiddleware($request, $response);
         $this->assertInstanceOf('Mockery_0_Illuminate_Http_Response', $response);
@@ -50,7 +50,7 @@ class Test extends \Orchestra\Testbench\TestCase
         $request->shouldReceive('method')->once()->andReturn('GET');
         $request->shouldReceive('expectsJson')->once()->andReturn(true);
         $request->shouldReceive('header')->with('If-Match')->once()->andReturn(null);
-        $request->shouldReceive('header')->with('If-Not-Match')->once()->andReturn($this->etag);
+        $request->shouldReceive('header')->with('If-None-Match')->once()->andReturn($this->etag);
 
         $response = $this->runMiddleware($request, $response);
 
@@ -67,7 +67,7 @@ class Test extends \Orchestra\Testbench\TestCase
         $request->shouldReceive('expectsJson')->once()->andReturn(true);
         $request->shouldReceive('method')->once()->andReturn('GET');
         $request->shouldReceive('header')->with('If-Match')->once()->andReturn(null);
-        $request->shouldReceive('header')->with('If-Not-Match')->once()->andReturn('*');
+        $request->shouldReceive('header')->with('If-None-Match')->once()->andReturn('*');
 
         $response = $this->runMiddleware($request, $response);
 
@@ -84,7 +84,7 @@ class Test extends \Orchestra\Testbench\TestCase
         $request->shouldReceive('expectsJson')->once()->andReturn(true);
         $request->shouldReceive('method')->once()->andReturn('GET');
         $request->shouldReceive('header')->with('If-Match')->once()->andReturn(null);
-        $request->shouldReceive('header')->with('If-Not-Match')->once()->andReturn('"wrong-etag"');
+        $request->shouldReceive('header')->with('If-None-Match')->once()->andReturn('"wrong-etag"');
 
         $response = $this->runMiddleware($request, $response);
 
@@ -100,7 +100,7 @@ class Test extends \Orchestra\Testbench\TestCase
         $request->shouldReceive('expectsJson')->once()->andReturn(true);
         $request->shouldReceive('method')->once()->andReturn('GET');
         $request->shouldReceive('header')->with('If-Match')->once()->andReturn($this->etag);
-        $request->shouldReceive('header')->with('If-Not-Match')->once()->andReturn(null);
+        $request->shouldReceive('header')->with('If-None-Match')->once()->andReturn(null);
 
         $response = $this->runMiddleware($request, $response);
 
@@ -116,7 +116,7 @@ class Test extends \Orchestra\Testbench\TestCase
         $request->shouldReceive('expectsJson')->once()->andReturn(true);
         $request->shouldReceive('method')->once()->andReturn('GET');
         $request->shouldReceive('header')->with('If-Match')->once()->andReturn('*');
-        $request->shouldReceive('header')->with('If-Not-Match')->once()->andReturn(null);
+        $request->shouldReceive('header')->with('If-None-Match')->once()->andReturn(null);
 
         $response = $this->runMiddleware($request, $response);
 
@@ -132,7 +132,7 @@ class Test extends \Orchestra\Testbench\TestCase
         $request->shouldReceive('expectsJson')->once()->andReturn(true);
         $request->shouldReceive('method')->once()->andReturn('GET');
         $request->shouldReceive('header')->with('If-Match')->once()->andReturn('"wrong-etag"');
-        $request->shouldReceive('header')->with('If-Not-Match')->once()->andReturn(null);
+        $request->shouldReceive('header')->with('If-None-Match')->once()->andReturn(null);
 
         $response = $this->runMiddleware($request, $response);
 
