@@ -10,10 +10,17 @@ class Test extends \Orchestra\Testbench\TestCase
 {
     use \Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
+    /**
+     * @var string
+     */
     protected $content;
+
+    /**
+     * @var string
+     */
     protected $etag;
 
-    function setUp()
+    function setUp(): void
     {
         parent::setUp();
 
@@ -21,7 +28,7 @@ class Test extends \Orchestra\Testbench\TestCase
         $this->etag = $this->getValidEtag($this->content);
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         m::close();
     }
@@ -197,13 +204,13 @@ class Test extends \Orchestra\Testbench\TestCase
      * @param string $content
      * @return string
      */
-    protected function getValidEtag($content)
+    protected function getValidEtag(string $content): string
     {
         return '"' . md5($content) . '"';
     }
 
 
-    protected function getResponseMockWithEtag($content, $etag)
+    protected function getResponseMockWithEtag(string $content, $etag)
     {
         $response = m::mock('Illuminate\Http\Response')
             ->shouldReceive('getStatusCode')
@@ -253,9 +260,9 @@ class Test extends \Orchestra\Testbench\TestCase
     /**
      * Get response contant sample content
      *
-     * @return array
+     * @return string
      */
-    protected function getValidJsonResponseContent()
+    protected function getValidJsonResponseContent(): string
     {
         return json_encode([
             "content" => [
