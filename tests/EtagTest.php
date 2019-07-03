@@ -4,6 +4,7 @@ namespace Tests;
 
 use Denismitr\ETag\ETagMiddleware;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Mockery as m;
 
 class Test extends \Orchestra\Testbench\TestCase
@@ -190,7 +191,7 @@ class Test extends \Orchestra\Testbench\TestCase
      * @param Response $response
      * @return Response
      */
-    protected function runMiddleware($request, $response)
+    protected function runMiddleware(Request $request, Response $response)
     {
         $middleware = new ETagMiddleware;
 
@@ -210,7 +211,7 @@ class Test extends \Orchestra\Testbench\TestCase
     }
 
 
-    protected function getResponseMockWithEtag(string $content, $etag)
+    protected function getResponseMockWithEtag(string $content, string $etag)
     {
         $response = m::mock('Illuminate\Http\Response')
             ->shouldReceive('getStatusCode')
@@ -229,7 +230,7 @@ class Test extends \Orchestra\Testbench\TestCase
         return $response;
     }
 
-    protected function getResponseWithErrorCode($code = 401, $times = 1)
+    protected function getResponseWithErrorCode(int $code = 401, int $times = 1)
     {
         $response = m::mock('Illuminate\Http\Response');
 
