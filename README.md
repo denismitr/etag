@@ -1,4 +1,6 @@
 # Laravel Etag Middleware for JSON APIs
+[![Build Status](https://travis-ci.org/denismitr/etag.svg?branch=master)](https://travis-ci.org/denismitr/etag.svg?branch=master)
+
 This a middleware specifically for the Laravel framework and __RESTful APIs__ build with it.
 It hashaes the response content and adds it to ETag header of HTTP response.
 Then it listenes to __If-Match__ and __If-None-Match__ headers of the requests that expect to
