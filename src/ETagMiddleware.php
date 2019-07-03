@@ -3,6 +3,8 @@
 namespace Denismitr\ETag;
 
 use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class ETagMiddleware
 {
@@ -17,39 +19,84 @@ class ETagMiddleware
     {
         $response = $next($request);
 
-        if ($response->getStatusCode() !== 200 || ! $request->expectsJson()) {
+        if ($this->isNonEtagable($response, $request)) {
             return $response;
         }
 
-        if ($request->method() === 'GET' || $request->method() === 'HEAD') {
-            $etag = '"' . md5($response->getContent()) . '"';
+        $etag = $this->extractEtag($response);
 
-            $response->header('ETag', $etag);
+        $response->header('ETag', $etag);
 
-            $ifMatch = $request->header('If-Match');
-            $ifNotMatch = $request->header('If-None-Match');
+        $ifMatch = $request->header('If-Match');
+        $ifNotMatch = $request->header('If-None-Match');
 
-            if ( ! is_null($ifMatch) ) {
-                $etagList = explode(',', $ifMatch);
+        if (is_string($ifMatch) && $this->noEtagMatch($etag, $ifMatch)) {
+            return response()->json([
+                'error' => [
+                    'http_code' => 412,
+                    'code' => 'PRECONDITION_FAILED',
+                    'message' => 'Precondition failed.'
+                ]
+            ], 412);
+        }
 
-                if ( ! in_array($etag, $etagList) && ! in_array('*', $etagList) ) {
-                    return response()->json([
-                        'error' => [
-                            'http_code' => 412,
-                            'code' => 'PRECONDITION_FAILED',
-                            'message' => 'Precondition failed.'
-                        ]
-                    ], 412);
-                }
-            } else if ( ! is_null($ifNotMatch) ) {
-                $etagList = explode(',', $ifNotMatch);
-
-                if ( in_array($etag, $etagList) || in_array('*', $etagList) ) {
-                    return response()->json(null, 304);
-                }
-            }
+        if (is_string($ifNotMatch) && $this->isEtagMatch($etag, $ifNotMatch)) {
+            return response()->json(null, 304);
         }
 
         return $response;
+    }
+
+    /**
+     * @param Response $response
+     * @param Request $request
+     * @return bool
+     */
+    private function isNonEtagable(Response $response, Request $request): bool
+    {
+        if ($response->getStatusCode() !== 200 || ! $request->expectsJson()) {
+            return true;
+        }
+
+        $method = strtolower($request->method());
+
+        if ($method !== 'get' && $method !== 'head') {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $etag
+     * @param string $ifMatch
+     * @return bool
+     */
+    private function noEtagMatch(string $etag, string $ifMatch): bool
+    {
+        $etagList = explode(',', $ifMatch);
+
+        return ! in_array($etag, $etagList) && ! in_array('*', $etagList);
+    }
+
+    /**
+     * @param string $etag
+     * @param string $ifNonMatch
+     * @return bool
+     */
+    private function isEtagMatch(string $etag, string $ifNonMatch): bool
+    {
+        $etagList = explode(',',  $ifNonMatch);
+
+        return in_array($etag, $etagList) || in_array('*', $etagList);
+    }
+
+    /**
+     * @param $response
+     * @return string
+     */
+    private function extractEtag(Response $response): string
+    {
+        return '"' . md5($response->getContent()) . '"';
     }
 }
