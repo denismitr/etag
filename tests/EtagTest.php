@@ -3,6 +3,7 @@
 namespace Tests;
 
 use Denismitr\ETag\ETagMiddleware;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Mockery as m;
@@ -47,6 +48,21 @@ class Test extends \Orchestra\Testbench\TestCase
 
         $response = $this->runMiddleware($request, $response);
         $this->assertInstanceOf('Mockery_0_Illuminate_Http_Response', $response);
+    }
+
+    /** @test */
+    public function it_returns_json_response_with_etag_header()
+    {
+        $response = $this->getJsonResponseMockWithEtag($this->content, $this->etag);
+
+        $request = m::mock('Illuminate\Http\Request');
+        $request->shouldReceive('method')->once()->andReturn('GET');
+        $request->shouldReceive('expectsJson')->once()->andReturn(true);
+        $request->shouldReceive('header')->with('If-Match')->once()->andReturn(null);
+        $request->shouldReceive('header')->with('If-None-Match')->once()->andReturn(null);
+
+        $response = $this->runMiddleware($request, $response);
+        $this->assertInstanceOf('Mockery_2_Illuminate_Http_JsonResponse', $response);
     }
 
     /** @test */
@@ -188,10 +204,10 @@ class Test extends \Orchestra\Testbench\TestCase
      * Run the middleware
      *
      * @param Request $request
-     * @param Response $response
+     * @param Response|JsonResponse $response
      * @return Response
      */
-    protected function runMiddleware(Request $request, Response $response)
+    protected function runMiddleware(Request $request, $response)
     {
         $middleware = new ETagMiddleware;
 
@@ -214,6 +230,25 @@ class Test extends \Orchestra\Testbench\TestCase
     protected function getResponseMockWithEtag(string $content, string $etag)
     {
         $response = m::mock('Illuminate\Http\Response')
+            ->shouldReceive('getStatusCode')
+            ->once()
+            ->andReturn(200)
+            ->shouldReceive('getContent')
+            ->once()
+            ->andReturn($content)
+            ->getMock();
+
+        $response
+            ->shouldReceive('header')
+            ->once()
+            ->with('ETag', $etag);
+
+        return $response;
+    }
+
+    protected function getJsonResponseMockWithEtag(string $content, string $etag)
+    {
+        $response = m::mock('Illuminate\Http\JsonResponse')
             ->shouldReceive('getStatusCode')
             ->once()
             ->andReturn(200)
