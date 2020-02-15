@@ -3,6 +3,7 @@
 namespace Denismitr\ETag;
 
 use Closure;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -48,11 +49,11 @@ class ETagMiddleware
     }
 
     /**
-     * @param Response $response
+     * @param JsonResponse|Response $response
      * @param Request $request
      * @return bool
      */
-    private function isNonEtagable(Response $response, Request $request): bool
+    private function isNonEtagable($response, Request $request): bool
     {
         if ($response->getStatusCode() !== 200 || ! $request->expectsJson()) {
             return true;
@@ -92,10 +93,10 @@ class ETagMiddleware
     }
 
     /**
-     * @param $response
+     * @param JsonResponse|Response $response
      * @return string
      */
-    private function extractEtag(Response $response): string
+    private function extractEtag($response): string
     {
         return '"' . md5($response->getContent()) . '"';
     }
